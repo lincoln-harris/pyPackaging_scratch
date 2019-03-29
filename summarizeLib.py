@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import settings
 
 # mutationsDF__fillIn()
 #    goal is to construct a cell-wise dataframe with mutations to each
@@ -267,3 +266,27 @@ def ROI_coverage_fillIn(coverage_df, queryGene, queryMutation, summaryTable_):
                 summaryTable_['coverage_to_ROI'][i] = currDepth_gvcf
             else:
                 summaryTable_['coverage_to_ROI'][i] = 0
+
+
+# validationTable_metadata_fillIn()
+#    fills in metadata field for the validationTable
+#              
+def validationTable_metadata_fillIn(metaField, validationField, validationTable_, patientMetadata_):
+	for i in range(0, len(validationTable_.index)):
+		currSample = validationTable_['sample'][i]
+		try:
+			rowToKeep = patientMetadata_['sample_name'] == currSample
+			patientRows = patientMetadata_[rowToKeep] # will return MULTIPLE rows
+			patientRows = patientRows.reset_index(drop=True)
+
+			fillField = patientRows[metaField][0]
+       
+			validationTable_[validationField][i] = fillField
+		except:
+			continue
+			#print('ERROR')
+
+#def __init__(self, name):
+#	self.name = 'summarizeLib'
+#	self.methods = ['mutationsDF_fillIn', 'hello', 'world', 'foo', 'bar']
+    
