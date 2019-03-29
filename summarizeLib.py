@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 
 # mutationsDF__fillIn()
 #    goal is to construct a cell-wise dataframe with mutations to each
@@ -285,6 +286,57 @@ def validationTable_metadata_fillIn(metaField, validationField, validationTable_
 		except:
 			continue
 			#print('ERROR')
+
+
+# validationTable_dict_muts()
+#    TODO: what does it do? 
+#         
+def validationTable_dict_muts(validationTable_):
+	d = {}
+	samplesList = validationTable_['sample']
+
+	for item in samplesList:
+		d.update({item:''})
+
+	for i in range(0, len(validationTable_.index)):
+		currSample = validationTable_['sample_name'][i]
+		currMuts = validationTable_cells['mutations_found'][i]
+		currMuts = str(currMuts)
+		currMutsSplit = currMuts.split(',')
+
+		currDictVal = d[currSample]
+    
+		for item in currMutsSplit:
+			if item not in currDictVal and item != 'nan':
+				updateVal = currDictVal + item + ', '
+				d.update({currSample:updateVal})
+
+	return(d)
+
+
+# validationTable_dict_generic()
+#    TODO: what does it do? 
+#         
+def validationTable_dict_generic(validationTable_, field):
+	d = {}
+	samplesList = validationTable_['sample']
+	for item in samplesList:
+		d.update({item:0})
+
+	for i in range(0, len(validationTable_.index)):
+		currCell = validationTable_['cell'][i]
+		currSample = validationTable_['sample_name'][i]
+		currBool = validationTable_[field][i]
+
+		currDictVal = d[currSample]  
+
+		if not math.isnan(currBool) and currBool != 0:
+			updateVal = currDictVal + 1
+			d.update({currSample:updateVal})
+
+	return(d)
+
+	
 
 #def __init__(self, name):
 #	self.name = 'summarizeLib'
