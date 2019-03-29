@@ -9,7 +9,7 @@ import settings
 #
 #    GOI needs to be lowercase
 #
-def mutationsDF__fillIn(GOI, GOI_df, mutationsDF_):
+def mutationsDF_fillIn(GOI, GOI_df, mutationsDF_):
 	mutName = GOI + 'Mut'
 	for i in range(0,len(mutationsDF_.index)):
 		currCell = mutationsDF_['cell'][i]
@@ -32,7 +32,7 @@ def mutationsDF__fillIn(GOI, GOI_df, mutationsDF_):
 #
 #    GOI needs to be lowercase
 #
-def removeExtraCharacters_mutationsDF_(GOI, mutationsDF_):
+def removeExtraCharacters_mutationsDF(GOI, mutationsDF_):
 	mutName = GOI + 'Mut'
 
 	mutationsDF_[mutName] = mutationsDF_[mutName].str.replace("'", "") # remove quotes
@@ -41,12 +41,12 @@ def removeExtraCharacters_mutationsDF_(GOI, mutationsDF_):
 	mutationsDF_[mutName] = mutationsDF_[mutName].str.replace(" ", "") # remove whitespace?
 
 
-# genericsummaryTable_FillIn()
+# genericSummaryTableFillIn()
 #    fills in a given (metadata) field in summaryTable_. pulls from 
 #    patientMetadata_ and goes cell-by-cell through 
 #    summaryTable_, filling in fields like patientID/driver_gene
 #
-def genericsummaryTable_FillIn(metaField, summaryField, summaryTable_, patientMetadata_):
+def genericSummaryTableFillIn(metaField, summaryField, summaryTable_, patientMetadata_):
 	for i in range(0,len(summaryTable_.index)):
 		currCell = summaryTable_['cell'].iloc[i]
 		currPlate = currCell.split('_')[1]
@@ -241,7 +241,7 @@ def tumorCellBoolFillIn(summaryTable_):
 #    vals. coverage dfs come from checkCoverage_parallel.py
 #
 def getNonZeroCovROI(gene, mut):
-	fPATH = '../coverage/out/' + gene + '_' + mut + '_' + 'coverageByCell.csv'
+	fPATH = '/Users/lincoln.harris/code/SNP_calling_pipeline/coverage/out/' + gene + '_' + mut + '_' + 'coverageByCell.csv'
 	cov = pd.read_csv(fPATH)
 	indices = cov['depth_gvcf'] != 0
 	cov_nonZero = cov[indices]

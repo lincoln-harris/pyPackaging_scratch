@@ -32,27 +32,31 @@ kras_df = pd.read_csv(krasPATH, header=None, names=['cell', 'mutations'])
 
 # FIRST STEP IS TO GENERATE THE mutationsDF
 print('creating mutationsDF')
+mutationsDF = pd.DataFrame(columns=['cell', 'brafMut', 'egfrMut', 'krasMut'])
 mutationsDF['cell'] = egfr_df['cell']
 mutationsDF['egfrMut'] = egfr_df['mutations'] # fill in EGFR first -- this is ok bc
                                               #  the cell order is based on egfr_df
 
-myLib.mutationsDF_fillIn('braf', braf_df) 
-myLib.mutationsDF_fillIn('kras', kras_df)
+myLib.mutationsDF_fillIn('braf', braf_df, mutationsDF) 
+myLib.mutationsDF_fillIn('kras', kras_df, mutationsDF)
 
-myLib.removeExtraCharacters_mutationsDF('egfr')
-myLib.removeExtraCharacters_mutationsDF('braf')
-myLib.removeExtraCharacters_mutationsDF('kras')
+myLib.removeExtraCharacters_mutationsDF('egfr', mutationsDF)
+myLib.removeExtraCharacters_mutationsDF('braf', mutationsDF)
+myLib.removeExtraCharacters_mutationsDF('kras', mutationsDF)
 
 # READ IN patientMetadata
+patientMetadata = pd.read_csv('/Users/lincoln.harris/code/SNP_calling_pipeline/cDNA_plate_metadata.csv')
 patientMetadata = patientMetadata.drop([0,1]) # first two rows are wierd
 
 # INIT THE SUMMARY TABLE
+cols = ['cell', 'patient', 'clinical_driver_gene', 'clinical_mutation', 'coverage_to_ROI', 'clin_mut_found_bool', 'mutations_found_EGFR', 'mutations_found_BRAF', 'mutations_found_KRAS', 'fusions_found', 'tumorCell_bool']
+summaryTable = pd.DataFrame(columns=cols)
 summaryTable['cell'] = mutationsDF['cell']
 
 # FILL IN VARIOUS METADATA COLS
-myLib.genericSummaryTableFillIn('patient_id', 'patient')
-myLib.genericSummaryTableFillIn('driver_gene', 'clinical_driver_gene')
-myLib.genericSummaryTableFillIn('driver_mutation', 'clinical_mutation')
+myLib.genericSummaryTableFillIn('patient_id', 'patient', summaryTable, patientMetadata)
+myLib.genericSummaryTableFillIn('driver_gene', 'clinical_driver_gene', summaryTable, patientMetadata)
+myLib.genericSummaryTableFillIn('driver_mutation', 'clinical_mutation', summaryTable, patientMetadata)
 
 # FILL IN MUTATIONS FOUND COL 
 summaryTable['mutations_found_EGFR'] = mutationsDF['egfrMut']
@@ -60,25 +64,25 @@ summaryTable['mutations_found_KRAS'] = mutationsDF['krasMut']
 summaryTable['mutations_found_BRAF'] = mutationsDF['brafMut']
 
 # READ IN FUSIONS DATAFRAME, THEN FILL IN summaryTable
-fusionsDF = pd.read_csv('./fusion_dataframe.csv')
-myLib.fusionsFillIn(fusionsDF)
+fusionsDF = pd.read_csv('/Users/lincoln.harris/code/SNP_calling_pipeline/summaryTable/fusion_dataframe.csv')
+myLib.fusionsFillIn(fusionsDF, summaryTable)
 
 # SET UP A COL TO TRANSLATE 'RAW' MUTATION CALLS TO 'CLINICAL'
 print('translating mutations')
 summaryTable['mutations_found_translated'] = ""
-myLib.translatedMutsFillIn_EGFR()
-myLib.translatedMutsFillIn_nonEGFR('KRAS')
-myLib.translatedMutsFillIn_nonEGFR('BRAF')
-myLib.translatedMutsFillIn_fusions()
+myLib.translatedMutsFillIn_EGFR(summaryTable)
+myLib.translatedMutsFillIn_nonEGFR('KRAS', summaryTable)
+myLib.translatedMutsFillIn_nonEGFR('BRAF', summaryTable)
+myLib.translatedMutsFillIn_fusions(summaryTable)
 
 # CONVERT LISTS TO STRING, SO I CAN GET SET -- probably not necessary, actually 
-myLib.convertToString()
+myLib.convertToString(summaryTable)
 
 # FILL IN clin_mut_found_bool
-myLib.clinMutFound_fillIn()
+myLib.clinMutFound_fillIn(summaryTable)
 
 # FILL IN  tumorCellBool
-myLib.tumorCellBoolFillIn()
+myLib.tumorCellBoolFillIn(summaryTable)
 
 # GET PER-CELL ROI COVERAGE DFs
 print('getting coverage to ROIs...')
@@ -102,17 +106,17 @@ egfr_exon19del_cov_nonZero['depth_gvcf'] = egfr_exon19del_cov_nonZero['depth_gvc
 egfr_exon19del_cov_nonZero['depth_gvcf'] = egfr_exon19del_cov_nonZero['depth_gvcf'].str.strip("'")
 
 # FILL IN ROI COVERAGE TO SUMMARY TABLE
-myLib.ROI_coverage_fillIn(braf_V600E_cov_nonZero, 'BRAF', 'V600E')
-myLib.ROI_coverage_fillIn(egfr_G719X_cov_nonZero, 'EGFR', 'G719X')
-myLib.ROI_coverage_fillIn(egfr_L858R_cov_nonZero, 'EGFR', 'L858R')
-myLib.ROI_coverage_fillIn(egfr_L861Q_cov_nonZero, 'EGFR', 'L861Q')
-myLib.ROI_coverage_fillIn(egfr_S768I_cov_nonZero, 'EGFR', 'S768I')
-myLib.ROI_coverage_fillIn(egfr_T790M_cov_nonZero, 'EGFR', 'T790M')
-myLib.ROI_coverage_fillIn(kras_G12C_cov_nonZero, 'KRAS', 'G12C')
-myLib.ROI_coverage_fillIn(kras_G13X_cov_nonZero, 'KRAS', 'G13X')
-myLib.ROI_coverage_fillIn(kras_Q61X_cov_nonZero, 'KRAS', 'Q61X')
-myLib.ROI_coverage_fillIn(egfr_exon19del_cov_nonZero, 'EGFR', 'del19')
-myLib.ROI_coverage_fillIn(egfr_exon20ins_cov_nonZero, 'EGFR', 'ins20')
+myLib.ROI_coverage_fillIn(braf_V600E_cov_nonZero, 'BRAF', 'V600E', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_G719X_cov_nonZero, 'EGFR', 'G719X', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_L858R_cov_nonZero, 'EGFR', 'L858R', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_L861Q_cov_nonZero, 'EGFR', 'L861Q', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_S768I_cov_nonZero, 'EGFR', 'S768I', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_T790M_cov_nonZero, 'EGFR', 'T790M', summaryTable)
+myLib.ROI_coverage_fillIn(kras_G12C_cov_nonZero, 'KRAS', 'G12C', summaryTable)
+myLib.ROI_coverage_fillIn(kras_G13X_cov_nonZero, 'KRAS', 'G13X', summaryTable)
+myLib.ROI_coverage_fillIn(kras_Q61X_cov_nonZero, 'KRAS', 'Q61X', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_exon19del_cov_nonZero, 'EGFR', 'del19', summaryTable)
+myLib.ROI_coverage_fillIn(egfr_exon20ins_cov_nonZero, 'EGFR', 'ins20', summaryTable)
 
 # TRIM IT DOWN
 print('trimming down...')
