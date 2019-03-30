@@ -289,18 +289,19 @@ def validationTable_metadata_fillIn(metaField, validationField, validationTable_
 
 
 # validationTable_dict_muts()
-#    TODO: what does it do? 
-#         
-def validationTable_dict_muts(validationTable_):
+#    returns a dictionary that holds values for all of the
+#    mutations to a given cell. 
+# 
+def validationTable_dict_muts(validationTable_, summaryTable_):
 	d = {}
 	samplesList = validationTable_['sample']
 
 	for item in samplesList:
 		d.update({item:''})
 
-	for i in range(0, len(validationTable_.index)):
-		currSample = validationTable_['sample_name'][i]
-		currMuts = validationTable_cells['mutations_found'][i]
+	for i in range(0, len(summaryTable_.index)):
+		currSample = summaryTable_['sample_name'][i]
+		currMuts = summaryTable_['mutations_found'][i]
 		currMuts = str(currMuts)
 		currMutsSplit = currMuts.split(',')
 
@@ -315,18 +316,19 @@ def validationTable_dict_muts(validationTable_):
 
 
 # validationTable_dict_generic()
-#    TODO: what does it do? 
+#    returns a dict with values for num cells that are tumor/
+#    have coverage to a given ROI, depending on what field 
+#    value is passed in.
 #         
-def validationTable_dict_generic(validationTable_, field):
+def validationTable_dict_generic(validationTable_, summaryTable_, field):
 	d = {}
 	samplesList = validationTable_['sample']
 	for item in samplesList:
 		d.update({item:0})
 
-	for i in range(0, len(validationTable_.index)):
-		currCell = validationTable_['cell'][i]
-		currSample = validationTable_['sample_name'][i]
-		currBool = validationTable_[field][i]
+	for i in range(0, len(summaryTable_.index)):
+		currSample = summaryTable_['sample_name'][i]
+		currBool = summaryTable_[field][i]
 
 		currDictVal = d[currSample]  
 
@@ -335,10 +337,4 @@ def validationTable_dict_generic(validationTable_, field):
 			d.update({currSample:updateVal})
 
 	return(d)
-
-	
-
-#def __init__(self, name):
-#	self.name = 'summarizeLib'
-#	self.methods = ['mutationsDF_fillIn', 'hello', 'world', 'foo', 'bar']
     
