@@ -1,3 +1,9 @@
+# summarizeLib.py
+# Lincoln Harris
+# 3.28.19
+# 
+# library of functions that allow you to create per-cell / per-sample summary tables
+
 import pandas as pd
 import numpy as np
 import math
