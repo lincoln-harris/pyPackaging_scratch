@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# my shit
+*.vcf
+*.vcf*
+geneCellMutationCounts_TEST.csv
+geneCellMutationCounts_artifical_TEST.csv
+CosmicGenomeScreensMutantExport.tsv
